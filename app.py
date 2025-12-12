@@ -8,10 +8,6 @@ app = Flask(__name__)
 # Load ML model
 model = pickle.load(open("model.pkl", "rb"))
 
-# MongoDB connection
-client = MongoClient("mongodb://localhost:27017/")
-db = client["stressdb"]
-records = db["predictions"]
 
 @app.route("/")
 def home():
@@ -34,15 +30,7 @@ def predict():
     # Predict
     prediction = model.predict([data])[0]
 
-    # Save to MongoDB
-    records.insert_one({
-        "study_hours": study,
-        "sleep_hours": sleep,
-        "assignments": assignment,
-        "social_media": social,
-        "exam_near": exam_near,
-        "predicted_stress": prediction
-    })
+
 
     # Go to NEXT PAGE with user-filled data + result
     return render_template(
@@ -82,4 +70,5 @@ def api_predict():
 import os
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port = 8000,debug=True)
+    port = int(os.environ.get("PORT",5000))
+    app.run(host='0.0.0.0', port = port)
